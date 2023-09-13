@@ -21,15 +21,9 @@ spring:
         format_sql: true
       default_batch_fetch_size: 100
     open-in-view: false
-  rabbitmq:
-    stream:
-      username: guest
-      password: guest
-      host: localhost
-      port: 5672
   data:
     mongodb:
-      host: localhost
+      host: ${MONGODB_HOST}
       port: 27017
       database: socketdb
 
