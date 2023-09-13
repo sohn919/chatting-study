@@ -1,6 +1,8 @@
 package com.server.chatting.aop;
 
+import com.server.chatting.error.exception.Exception500;
 import com.server.chatting.response.ApiUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Aspect
 @Component
 public class ResponseHandler {
@@ -24,13 +27,22 @@ public class ResponseHandler {
     public void getMapping() {
     }
 
-//    @Around("postMapping() || putMapping() || getMapping()")
-    public ResponseEntity<?> validationAdvice(ProceedingJoinPoint jp) throws Throwable {
-        ResponseEntity<?> originalReturnValue = (ResponseEntity<?>) jp.proceed();
+    @Around("postMapping() || putMapping() || getMapping()")
+    public Object validationAdvice(ProceedingJoinPoint jp){
+        try {
+            Object proceed = jp.proceed();
 
-        Object body = originalReturnValue.getBody();
-        HttpStatus statusCode = originalReturnValue.getStatusCode();
+            if (!(proceed instanceof ResponseEntity<?>)) {
+                return proceed;
+            }
 
-        return ResponseEntity.status(statusCode).body(ApiUtils.success(body));
+            ResponseEntity<?> originalReturnValue = (ResponseEntity<?>) proceed;
+            Object body = originalReturnValue.getBody();
+            HttpStatus statusCode = originalReturnValue.getStatusCode();
+            return ResponseEntity.status(statusCode).body(ApiUtils.success(body));
+        } catch (Throwable e) {
+            log.error("{}", e.getMessage());
+            throw new Exception500("Error");
+        }
     }
 }
