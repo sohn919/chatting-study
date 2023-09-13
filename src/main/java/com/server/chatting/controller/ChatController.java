@@ -20,7 +20,6 @@ public class ChatController {
 
     @MessageMapping("/chat/send")
     public void sendMessage(@Payload ChatMessage chatMessage, @Header("Authorization") String token) {
-        System.out.println(token);
         chatMessage.setCreatedAt(LocalDateTime.now());
         chatMessageRepository.save(chatMessage);
         template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
